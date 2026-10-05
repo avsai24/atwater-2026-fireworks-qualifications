@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atwater's Path to Tier 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ec;
+  --surface:#ffffff;
+  --surface-2:#ece8dc;
+  --ink:#1c2420;
+  --ink-dim:#5b645d;
+  --line:#d8d3c2;
+  --accent:#1d6b4a;
+  --accent-ink:#0f4a32;
+  --good:#2f7a4f;
+  --good-bg:#e3f1e7;
+  --bad:#a8341f;
+  --bad-bg:#f7e4df;
+  --warn:#9a6a12;
+  --warn-bg:#f5ead2;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --display: 'Barlow Condensed', var(--sans);
+  color-scheme: light;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.5;
+  padding:0 16px;
+  padding-block:28px 56px;
+}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:28px;}
+
+.kicker{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--accent-ink);
+  font-weight:600;
+}
+h1{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:clamp(32px,7vw,48px);
+  line-height:1.02;
+  margin:4px 0 0;
+}
+.sub{color:var(--ink-dim);font-size:15px;max-width:60ch;margin-top:2px;}
+
+.scoreboard{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+  border-radius:10px;
+  overflow:hidden;
+}
+.scoreboard .cell{background:var(--surface);padding:12px 6px;text-align:center;}
+.scoreboard .cell .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(18px,4vw,24px);font-weight:600;}
+.scoreboard .cell .k{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-dim);margin-top:2px;}
+.scoreboard .cell.hot .v{color:var(--bad);}
+@media (max-width:480px){ .scoreboard{grid-template-columns:repeat(3,1fr);} }
+
+.equation{
+  background:var(--accent);
+  color:#fdfbf4;
+  border-radius:12px;
+  padding:20px 22px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.equation .row{display:flex;align-items:baseline;gap:10px;font-family:var(--mono);font-variant-numeric:tabular-nums;flex-wrap:wrap;}
+.equation .row .n{font-size:22px;font-weight:700;}
+.equation .row .label{font-size:13px;opacity:0.85;}
+.equation .result{font-family:var(--display);font-size:clamp(20px,4.5vw,26px);font-weight:700;border-top:1px solid rgba(255,255,255,0.35);padding-top:10px;margin-top:2px;}
+
+section{display:flex;flex-direction:column;gap:12px;}
+.section-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.section-head h2{font-family:var(--display);font-weight:600;font-size:22px;margin:0;}
+.tag{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:999px;font-weight:600;letter-spacing:0.02em;}
+.tag.critical{background:var(--bad-bg);color:var(--bad);}
+.tag.watch{background:var(--warn-bg);color:var(--warn);}
+.tag.info{background:var(--surface-2);color:var(--ink-dim);}
+
+p{margin:0;max-width:68ch;}
+.callout{border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;padding:12px 16px;font-size:15px;}
+.callout b{color:var(--accent-ink);}
+
+.table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;}
+table{width:100%;border-collapse:collapse;background:var(--surface);font-size:14px;min-width:420px;}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;}
+th{font-family:var(--mono);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-dim);background:var(--surface-2);}
+td.num, th.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;}
+tr:last-child td{border-bottom:none;}
+td.want{color:var(--good);font-weight:600;}
+.nrr-pos{color:var(--bad);font-weight:600;}
+.nrr-neg{color:var(--good);font-weight:600;}
+
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
+.group-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;}
+.group-card .g{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--accent-ink);background:var(--good-bg);width:fit-content;padding:2px 8px;border-radius:5px;}
+.group-card p{font-size:13.5px;color:var(--ink);}
+
+.tracker{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px;}
+.step{display:flex;gap:12px;}
+.step .no{font-family:var(--mono);font-weight:700;color:var(--accent-ink);background:var(--good-bg);min-width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.step .body{display:flex;flex-direction:column;gap:4px;padding-top:2px;}
+.step code.big{font-family:var(--mono);font-variant-numeric:tabular-nums;background:var(--surface-2);border-radius:6px;padding:6px 10px;width:fit-content;font-size:14px;}
+
+.status-row{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+.status-row .srow{display:flex;justify-content:space-between;padding:8px 12px;font-family:var(--mono);font-size:13px;border-bottom:1px solid var(--line);}
+.status-row .srow:last-child{border-bottom:none;}
+.srow.green{background:var(--good-bg);color:var(--good);}
+.srow.amber{background:var(--warn-bg);color:var(--warn);font-weight:700;}
+.srow.red{background:var(--bad-bg);color:var(--bad);}
+
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;overflow-x:auto;max-width:100%;}
+.diagram .mermaid{display:flex;justify-content:center;}
+.diagram pre.mermaid{white-space:pre-wrap;word-break:break-word;margin:0;font-size:12px;}
+
+.watchlist{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media (max-width:560px){.watchlist{grid-template-columns:1fr;}}
+.watch-col{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface);}
+.watch-col h3{margin:0 0 8px;font-family:var(--display);font-size:16px;font-weight:600;}
+.watch-col ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;}
+.watch-col.good h3{color:var(--good);}
+.watch-col.bad h3{color:var(--bad);}
+
+.bottom-line{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px;}
+.bottom-line .big{font-family:var(--display);font-size:clamp(18px,4vw,22px);font-weight:600;}
+ol.conditions{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.final{font-size:14.5px;border-top:1px dashed var(--line);padding-top:12px;color:var(--ink-dim);}
+.final b{color:var(--ink);}
+
+footer{color:var(--ink-dim);font-size:12px;text-align:center;margin-top:8px;}
+
+.tabs{display:flex;gap:8px;}
+.tab{font-family:var(--display);font-size:16px;font-weight:600;padding:9px 20px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-dim);cursor:pointer;}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fdfbf4;}
+.panel{display:flex;flex-direction:column;gap:28px;}
+.panel[hidden]{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div>
+    <div class="kicker">Qualification Scenario &middot; Final Standings</div>
+    <h1>Atwater Kings</h1>
+    <p class="sub">All 8 matches complete, 2 wins, NRR &minus;1.4990. See which qualification tier is still reachable.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabTier3" type="button">Tier 3</button>
+    <button class="tab" id="tabTier4" type="button">Tier 4</button>
+  </div>
+
+  <div class="scoreboard">
+    <div class="cell"><div class="v">8</div><div class="k">Matches</div></div>
+    <div class="cell"><div class="v">2</div><div class="k">Wins</div></div>
+    <div class="cell"><div class="v">4</div><div class="k">Losses</div></div>
+    <div class="cell"><div class="v">2</div><div class="k">N/R</div></div>
+    <div class="cell"><div class="v">6</div><div class="k">Points</div></div>
+    <div class="cell hot"><div class="v">&minus;1.4990</div><div class="k">NRR</div></div>
+  </div>
+
+  <div class="panel" id="panelTier3">
+
+  <div class="equation">
+    <div class="row"><span class="n">42</span><span class="label">teams already have 3+ wins</span></div>
+    <div class="row"><span class="n">+5</span><span class="label">more expected from unavoidable head-to-heads</span></div>
+    <div class="row"><span class="n">=47</span><span class="label">teams ahead of Atwater</span></div>
+    <div class="result">Atwater can still land #48 &mdash; Tier 3, on a near-perfect scenario.</div>
+  </div>
+
+  <section>
+    <div class="section-head"><h2>The one rule to track</h2></div>
+    <p>Atwater sits on <b>2 wins</b>. Any team that finishes with <b>3+ wins</b> is automatically ahead. A team that stays on <b>2 wins</b> is only ahead if its final NRR beats <b>&minus;1.4990</b>.</p>
+    <div class="callout">Maximum teams allowed ahead = <b>47</b>. One more &mdash; 48 ahead &mdash; and Atwater drops to #49, Tier 4.</div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Already unavoidable</h2>
+      <span class="tag info">+5 teams, by normal results</span>
+    </div>
+    <p>These remaining head-to-heads force at least 5 more teams to 3 wins no matter what.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Situation</th><th class="num">Min. new 3-win teams</th></tr></thead>
+        <tbody>
+          <tr><td>Group A: KOP / Keystone / AIB round-robin</td><td class="num">2</td></tr>
+          <tr><td>Group A: Bulls vs Weekend Warriors</td><td class="num">1</td></tr>
+          <tr><td>Group C: Hit and Run vs VFS Blasters</td><td class="num">1</td></tr>
+          <tr><td>Group I: Wildcats vs Collegeville Super Kings</td><td class="num">1</td></tr>
+          <tr><td><b>Total</b></td><td class="num"><b>5</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Results Atwater needs</h2>
+      <span class="tag critical">Avoid a 6th 3-win team</span>
+    </div>
+    <p>If one extra team reaches 3 wins: 42 + 5 + 1 = 48 ahead &rarr; Atwater falls to #49, Tier 4.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Match / situation</th><th>Result wanted</th></tr></thead>
+        <tbody>
+          <tr><td>Philly Chargers vs Slammers</td><td class="want">Slammers win</td></tr>
+          <tr><td>Philly Chargers vs FIGHTERS&#8209;XI</td><td class="want">FIGHTERS-XI win</td></tr>
+          <tr><td>Bravehearts vs Urban Hawks</td><td class="want">Urban Hawks win</td></tr>
+          <tr><td>Philly Mavericks vs Super Eagles</td><td class="want">Super Eagles win</td></tr>
+          <tr><td>CSK Warriors vs Jolly Rovers</td><td class="want">Jolly Rovers win</td></tr>
+          <tr><td>Steel Balls vs Titans Prime</td><td class="want">Titans Prime win</td></tr>
+          <tr><td>Blaze Warriors vs Dragon Spirits</td><td class="want">Dragon Spirits win</td></tr>
+          <tr><td>Sun Risers Hunters vs Dragon Spirits</td><td class="want">Dragon Spirits win</td></tr>
+          <tr><td>Masters / Wayne Warriors&#8209;1 / Malvern Mavericks</td><td class="want">Split wins 1&#8209;1&#8209;1</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>The NRR problem</h2>
+      <span class="tag watch">Target: worse than &minus;1.4990</span>
+    </div>
+    <p>Even if exactly 47 teams finish ahead on wins, every remaining <b>2-win team</b> still needs to finish below Atwater's NRR of <b>&minus;1.4990</b>.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Team</th><th class="num">Current NRR</th><th>What needs to happen</th></tr></thead>
+        <tbody>
+          <tr><td>Hit and Run 1</td><td class="num nrr-pos">+1.5641</td><td>Lose both, very large NRR drop</td></tr>
+          <tr><td>Interstellars</td><td class="num nrr-pos">+1.0824</td><td>Lose both, very large NRR drop</td></tr>
+          <tr><td>Paoli Panthers</td><td class="num nrr-pos">+0.7792</td><td>Lose both, large NRR drop</td></tr>
+          <tr><td>Collegeville Super Kings</td><td class="num nrr-pos">+0.4652</td><td>Lose both, large NRR drop</td></tr>
+          <tr><td>Weekend Warriors</td><td class="num nrr-pos">+0.3342</td><td>If staying on 2 wins, needs big NRR drop</td></tr>
+          <tr><td>Bulls</td><td class="num nrr-pos">+0.1848</td><td>If staying on 2 wins, needs big NRR drop</td></tr>
+          <tr><td>Northeast Hellcats</td><td class="num nrr-neg">&minus;0.4339</td><td>Lose both and fall below &minus;1.4990</td></tr>
+          <tr><td>AIB</td><td class="num nrr-neg">&minus;0.8223</td><td>Ideally lose both</td></tr>
+          <tr><td>Hit and Run</td><td class="num nrr-neg">&minus;0.9713</td><td>If staying on 2 wins, needs NRR below Atwater</td></tr>
+          <tr><td>Steel Balls</td><td class="num nrr-neg">&minus;1.0395</td><td>Lose and fall below &minus;1.4990</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub">Exact run margins can't be calculated until actual match scores are known.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Best-case shape, by group</h2></div>
+    <div class="groups">
+      <div class="group-card"><span class="g">GROUP A</span><p>Keep Hit and Run 1 on 2 wins; AIB ideally loses both; only one of Bulls/Weekend reaches 3 wins</p></div>
+      <div class="group-card"><span class="g">GROUP C</span><p>Only one of Hit and Run/VFS reaches 3 wins; Philly Chargers loses both</p></div>
+      <div class="group-card"><span class="g">GROUP D</span><p>Paoli stays on 2 wins; Masters/Wayne-1/Malvern split 1-1-1</p></div>
+      <div class="group-card"><span class="g">GROUP G</span><p>Northeast loses both; Bravehearts loses; Philly Mavericks loses</p></div>
+      <div class="group-card"><span class="g">GROUP H</span><p>Steel Balls loses; CSK Warriors loses</p></div>
+      <div class="group-card"><span class="g">GROUP I</span><p>Only one of Wildcats/Collegeville reaches 3 wins; Interstellars loses both; Blaze stays below 2 wins if possible</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Live tier tracker</h2></div>
+    <div class="tracker">
+      <div class="step">
+        <div class="no">1</div>
+        <div class="body"><b>Start here</b><code class="big">Teams already ahead of Atwater = 42</code></div>
+      </div>
+      <div class="step">
+        <div class="no">2</div>
+        <div class="body"><b>Count every new 3-win team</b><code class="big">42 + new 3-win teams</code></div>
+      </div>
+      <div class="step">
+        <div class="no">3</div>
+        <div class="body"><b>Interpret the number</b>
+          <div class="status-row">
+            <div class="srow green"><span>42&ndash;46 ahead</span><span>Still room</span></div>
+            <div class="srow amber"><span>47 ahead</span><span>Tier 3 alive only through NRR</span></div>
+            <div class="srow red"><span>48+ ahead</span><span>Tier 3 gone</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="no">4</div>
+        <div class="body"><b>If the count is exactly 47</b>
+          <p>Check every remaining 2-win team &mdash; final NRR must be worse than <b>&minus;1.4990</b>.</p>
+          <code class="big">47 ahead on wins + 1 ahead on NRR = 48 ahead &rarr; Atwater #49 &rarr; Tier 4</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Decision tree</h2></div>
+    <div class="diagram">
+      <pre class="mermaid">
+flowchart TD
+    A["Atwater: 2 wins, NRR -1.4990"] --> B["42 teams already have 3+ wins"]
+    B --> C{"How many NEW teams reach 3+ wins?"}
+    C -->|"6 or more"| D["Tier 3 gone"]
+    C -->|"5"| E["47 teams ahead"]
+    C -->|"4 or fewer"| F["Extra breathing room"]
+    E --> G{"Any remaining 2-win team above -1.4990?"}
+    G -->|"Yes"| D
+    G -->|"No"| H["#48, Tier 3"]
+
+    classDef neutral fill:#ece8dc,stroke:#d8d3c2,color:#1c2420;
+    classDef red fill:#f7e4df,stroke:#a8341f,color:#a8341f;
+    classDef green fill:#e3f1e7,stroke:#2f7a4f,color:#2f7a4f;
+    class A,B,E neutral;
+    class D red;
+    class F,H green;
+      </pre>
+    </div>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+        primaryColor: '#ece8dc',
+        primaryBorderColor: '#d8d3c2',
+        primaryTextColor: '#1c2420',
+        lineColor: '#5b645d',
+        fontSize: '14px'
+      }
+    });
+    // Only render diagrams once their panel is actually visible -
+    // Mermaid can't measure text inside a display:none container.
+    mermaid.run({ querySelector: '#panelTier3 pre.mermaid' });
+  </script>
+
+  <section>
+    <div class="section-head"><h2>What to watch this weekend</h2></div>
+    <div class="watchlist">
+      <div class="watch-col good">
+        <h3>Good</h3>
+        <ul>
+          <li>Strong teams already ahead of us keep winning</li>
+          <li>Teams with 1 or 2 wins lose</li>
+          <li>Losses heavy enough to hurt competing teams' NRR</li>
+          <li>Group D's 1-win teams split their games 1-1-1</li>
+        </ul>
+      </div>
+      <div class="watch-col bad">
+        <h3>Bad</h3>
+        <ul>
+          <li>An unexpected team reaches 3 wins</li>
+          <li>Steel Balls wins</li>
+          <li>Philly Chargers wins both</li>
+          <li>Bravehearts wins and moves to 2 wins with a better NRR</li>
+          <li>A strong-NRR 2-win team remains above &minus;1.4990</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="bottom-line">
+    <div class="kicker">Bottom line</div>
+    <div class="big">Tier 3 is mathematically possible, but Atwater is fighting for approximately the final Tier 3 spot, Seed #48.</div>
+    <code class="big" style="width:fit-content;">42 already ahead + 5 unavoidable = 47 &rarr; Atwater can be #48</code>
+    <ol class="conditions">
+      <li>No 6th unexpected team should reach 3 wins.</li>
+      <li>Remaining 2-win competitors must finish below Atwater's &minus;1.4990 NRR.</li>
+      <li>Several results and NRR swings have to go almost perfectly.</li>
+    </ol>
+    <div class="final">Tier 3 is alive, but it needs almost a perfect weekend: <b>no extra 3-win team beyond the unavoidable five</b>, and <b>the remaining 2-win teams must fall below our &minus;1.4990 NRR</b>.</div>
+  </div>
+
+  </div>
+
+  <div class="panel" id="panelTier4" hidden>
+
+  <div class="equation">
+    <div class="row"><span class="n">56</span><span class="label">teams currently ahead of Atwater</span></div>
+    <div class="row"><span class="n">+7</span><span class="label">new passers Atwater can still absorb</span></div>
+    <div class="row"><span class="n">=63</span><span class="label">max teams ahead and still qualify</span></div>
+    <div class="result">Atwater sits around #57 &mdash; Tier 4 is the realistic path, with a 7-position cushion.</div>
+  </div>
+
+  <section>
+    <div class="section-head"><h2>The one rule to track</h2></div>
+    <p>Atwater is projected around <b>#57</b>, well inside the Tier 4 cutoff of #64. Any team currently below Atwater that reaches <b>3 wins</b> moves ahead regardless of NRR. A team stuck on 2 wins only passes if its NRR beats Atwater's <b>&minus;1.4990</b>.</p>
+    <div class="callout">Maximum new passers allowed = <b>7</b>. The 8th new passer drops Atwater to #65, outside Tier 4.</div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Simple tracker</h2>
+      <span class="tag info">Current cushion: 7 teams</span>
+    </div>
+    <p>Every time a team currently below Atwater clearly moves ahead, add +1 to the projected seed.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th class="num">New teams that pass Atwater</th><th class="num">Projected position</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="num">0</td><td class="num">#57</td><td>Tier 4</td></tr>
+          <tr><td class="num">1</td><td class="num">#58</td><td>Tier 4</td></tr>
+          <tr><td class="num">3</td><td class="num">#60</td><td>Tier 4</td></tr>
+          <tr><td class="num">5</td><td class="num">#62</td><td>Tier 4</td></tr>
+          <tr><td class="num">7</td><td class="num">#64</td><td>Last qualification spot</td></tr>
+          <tr><td class="num"><b>8</b></td><td class="num"><b>#65</b></td><td><b>Outside Top 64</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub">Assumes none of the teams currently above Atwater falls behind us.</p>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Who can still pass Atwater &mdash; high threat</h2>
+      <span class="tag critical">Reaching 3 wins passes us regardless of NRR</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Team</th><th class="num">Current wins</th><th class="num">Games left</th><th class="num">Max wins</th></tr></thead>
+        <tbody>
+          <tr><td>Blaze Warriors</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+          <tr><td>Masters Cricket Club</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+          <tr><td>Wayne Warriors&#8209;1</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+          <tr><td>Malvern Mavericks</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+          <tr><td>Old Monks 2</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+          <tr><td>Sun Risers Hunters</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+          <tr><td>Philly Chargers</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">Good news: the schedule limits this. Blaze vs Sun Risers means at most <b>one</b> of them reaches 3 wins. Masters vs Wayne&#8209;1 vs Malvern means at most <b>one</b> of the three does too.</div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Direct 2-win / NRR threats</h2>
+      <span class="tag watch">Target: worse than &minus;1.4990</span>
+    </div>
+    <p>These teams may not reach 3 wins, but on 2 wins they can still challenge Atwater's NRR.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Team</th><th class="num">Current wins</th><th class="num">Current NRR</th><th>Risk</th></tr></thead>
+        <tbody>
+          <tr><td>Bravehearts</td><td class="num">1</td><td class="num nrr-neg">&minus;1.1571</td><td>High</td></tr>
+          <tr><td>CSK Warriors</td><td class="num">1</td><td class="num nrr-neg">&minus;1.7813</td><td>Needs NRR improvement</td></tr>
+          <tr><td>Philly Mavericks</td><td class="num">1</td><td class="num nrr-neg">&minus;4.1837</td><td>Needs huge NRR improvement</td></tr>
+          <tr><td>Keystone Strikers II</td><td class="num">0</td><td class="num nrr-neg">&minus;2.5917</td><td>Must win both + improve NRR</td></tr>
+          <tr><td>Old Monks 1</td><td class="num">0</td><td class="num nrr-neg">&minus;3.5653</td><td>Must win both + huge NRR swing</td></tr>
+          <tr><td>Raptors</td><td class="num">0</td><td class="num nrr-neg">&minus;3.5871</td><td>Must win both + huge NRR swing</td></tr>
+          <tr><td>F2 Bois</td><td class="num">0</td><td class="num nrr-neg">&minus;3.8660</td><td>Must win both + huge NRR swing</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">Bravehearts is the clearest danger: NRR <b>&minus;1.1571</b> vs Atwater's <b>&minus;1.4990</b>. A second win while holding that NRR edge moves it straight past Atwater.</div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Results that help Atwater most</h2></div>
+    <p>No need for a perfect weekend like Tier 3 &mdash; we mainly want the teams below us to keep losing.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Situation</th><th>Best result for Atwater</th></tr></thead>
+        <tbody>
+          <tr><td>Bravehearts vs Urban Hawks</td><td class="want">Urban Hawks win</td></tr>
+          <tr><td>Dragon Spirits vs Blaze Warriors</td><td class="want">Dragon Spirits win</td></tr>
+          <tr><td>Sun Risers vs Blaze Warriors</td><td class="want">Sun Risers win preferred</td></tr>
+          <tr><td>Dragon Spirits vs Sun Risers</td><td class="want">Dragon Spirits win</td></tr>
+          <tr><td>Masters / Wayne&#8209;1 / Malvern</td><td class="want">Split wins 1&#8209;1&#8209;1</td></tr>
+          <tr><td>Old Monks 2 vs Panthers</td><td class="want">Panthers win</td></tr>
+          <tr><td>Paoli Panthers vs Old Monks 2</td><td class="want">Paoli Panthers win</td></tr>
+          <tr><td>Slammers vs Philly Chargers</td><td class="want">Slammers win</td></tr>
+          <tr><td>FIGHTERS&#8209;XI vs Philly Chargers</td><td class="want">FIGHTERS-XI win</td></tr>
+          <tr><td>Jolly Rovers vs CSK Warriors</td><td class="want">Jolly Rovers win</td></tr>
+          <tr><td>Super Eagles vs Philly Mavericks</td><td class="want">Super Eagles win</td></tr>
+          <tr><td>Interstellars + CCC&#8209;1 vs Keystone Strikers II</td><td class="want">Keystone II loses both</td></tr>
+          <tr><td>Reading CC vs Raptors / Old Monks 1</td><td class="want">Reading CC wins both</td></tr>
+          <tr><td>F2 Bois vs Weekend / Bulls</td><td class="want">F2 Bois loses both</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Best result patterns to remember</h2></div>
+    <div class="groups">
+      <div class="group-card"><span class="g">A &middot; BLAZE / SUN RISERS</span><p>Dragon beats Blaze, Dragon beats Sun Risers, Sun Risers beats Blaze &mdash; keeps Blaze's already-better NRR from becoming a threat</p></div>
+      <div class="group-card"><span class="g">B &middot; MASTERS / WAYNE-1 / MALVERN</span><p>Each team goes 1-1, so all three finish on 2 wins instead of one reaching 3</p></div>
+      <div class="group-card"><span class="g">C &middot; OLD MONKS 2</span><p>Loses to Panthers and to Paoli Panthers, keeping it at 1 win</p></div>
+      <div class="group-card"><span class="g">D &middot; PHILLY CHARGERS</span><p>Loses to Slammers and to FIGHTERS-XI, keeping it at 1 win</p></div>
+      <div class="group-card"><span class="g">E &middot; BRAVEHEARTS</span><p>Urban Hawks beats Bravehearts, keeping it off 2 wins with its currently better NRR</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Live qualification tracker</h2></div>
+    <div class="tracker">
+      <div class="step">
+        <div class="no">1</div>
+        <div class="body"><b>Start here</b><code class="big">Atwater projected seed = #57</code></div>
+      </div>
+      <div class="step">
+        <div class="no">2</div>
+        <div class="body"><b>Every clear passer below Atwater</b><code class="big">Add +1 to the projected seed</code></div>
+      </div>
+      <div class="step">
+        <div class="no">3</div>
+        <div class="body"><b>Interpret the number</b>
+          <div class="status-row">
+            <div class="srow green">0&ndash;6 passers &rarr; #57&ndash;#63</div>
+            <div class="srow amber">7 passers &rarr; #64, last qualifying spot</div>
+            <div class="srow red">8+ passers &rarr; #65 or worse, outside Top 64</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Decision tree</h2></div>
+    <div class="diagram">
+      <pre class="mermaid">
+flowchart TD
+    A["Atwater currently ~#57"] --> B["Track teams currently below Atwater"]
+    B --> C{"How many move ahead?"}
+    C -->|"0-6"| D["Tier 4 qualification looks safe"]
+    C -->|"7"| E["Atwater ~#64, final qualifying spot"]
+    C -->|"8+"| F["Atwater ~#65 or worse, qualification danger"]
+    D --> G["Qualified in Tier 4"]
+    E --> H["Check final NRR / official seeding carefully"]
+
+    classDef neutral fill:#ece8dc,stroke:#d8d3c2,color:#1c2420;
+    classDef red fill:#f7e4df,stroke:#a8341f,color:#a8341f;
+    classDef green fill:#e3f1e7,stroke:#2f7a4f,color:#2f7a4f;
+    class A,B,E neutral;
+    class F red;
+    class D,G green;
+      </pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>What to watch this weekend</h2></div>
+    <div class="watchlist">
+      <div class="watch-col good">
+        <h3>Good</h3>
+        <ul>
+          <li>Teams currently below Atwater keep losing</li>
+          <li>Blaze / Sun Risers split as expected, neither threatens</li>
+          <li>Masters / Wayne-1 / Malvern split 1-1-1</li>
+          <li>Bravehearts loses to Urban Hawks</li>
+        </ul>
+      </div>
+      <div class="watch-col bad">
+        <h3>Bad</h3>
+        <ul>
+          <li>An unexpected team currently below Atwater reaches 3 wins</li>
+          <li>Bravehearts gets its second win while keeping a better NRR</li>
+          <li>Philly Chargers or Old Monks 2 wins both remaining games</li>
+          <li>An 8th new team passes Atwater</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="bottom-line">
+    <div class="kicker">Bottom line</div>
+    <div class="big">Tier 4 is the realistic qualification path for Atwater, currently around seed #57.</div>
+    <code class="big" style="width:fit-content;">56 ahead + 7 new passers = 63 ahead &rarr; Atwater #64, qualified</code>
+    <code class="big" style="width:fit-content;">56 ahead + 8 new passers = 64 ahead &rarr; Atwater #65, misses out</code>
+    <ol class="conditions">
+      <li>Atwater can absorb up to 7 teams moving ahead and still qualify at #64.</li>
+      <li>The 8th new team passing us is the danger point.</li>
+      <li>We mainly need the teams currently below us to keep losing &mdash; no need for a perfect weekend.</li>
+    </ol>
+    <div class="final">Unlike Tier 3, which needs an almost perfect run of results, Tier 4 already has a 7-position cushion built in &mdash; the job is just to stop an 8th team from sneaking past.</div>
+  </div>
+
+  </div>
+
+  <footer>Scenario as of latest standings &middot; recalculate after each match</footer>
+</div>
+
+<script>
+  var tabTier3 = document.getElementById('tabTier3');
+  var tabTier4 = document.getElementById('tabTier4');
+  var panelTier3 = document.getElementById('panelTier3');
+  var panelTier4 = document.getElementById('panelTier4');
+
+  function showTier(tier){
+    var isT3 = tier === 3;
+    panelTier3.hidden = !isT3;
+    panelTier4.hidden = isT3;
+    tabTier3.classList.toggle('active', isT3);
+    tabTier4.classList.toggle('active', !isT3);
+    if (!isT3 && window.mermaid){
+      // Render the Tier 4 diagram now that its panel is visible -
+      // mermaid.run() skips any diagram already processed, so this is safe to call every time.
+      mermaid.run({ querySelector: '#panelTier4 pre.mermaid' });
+    }
+  }
+
+  tabTier3.addEventListener('click', function(){ showTier(3); });
+  tabTier4.addEventListener('click', function(){ showTier(4); });
+</script>
+
+</body>
+</html>
